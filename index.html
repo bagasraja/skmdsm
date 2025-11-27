@@ -1,203 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitoring Sensor Tekanan Udara</title>   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Environmental Monitoring Dashboard</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      text-align: center;
-      padding: 20px;
-    }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #0c0f19;
+      color: #e4e4e4;
+      margin: 0;
+    }
 
-    .gauges {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
-    }
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #111524;
+      font-size: 26px;
+      font-weight: bold;
+      color: #61dafb;
+      box-shadow: 0 2px 10px #000;
+      letter-spacing: 1px;
+    }
 
-    canvas {
-      max-width: 100%;
-    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
 
-    .chart-box {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-    }
+    .gauges {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+      gap: 20px;
+    }
 
-  </style>
+    .chart-box {
+      background: #111524;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+
 </head>
 
 <body>
-  <div class="container">
 
-        <div class="gauges">
-      <canvas id="gaugeVoltage" width="200" height="200"></canvas>
-      <canvas id="gaugeCurrent" width="200" height="200"></canvas>
-      <canvas id="gaugePower" width="200" height="200"></canvas>
-      <canvas id="gaugePressure" width="200" height="200"></canvas>     </div>
+<header>Environmental Sensor Dashboard</header>
 
-        <div class="chart-box">
-      <canvas id="lineChart"></canvas>
-      <p>Grafik Tekanan Udara, Suhu, dan Kelembaban (Contoh Simulasi Sensor Lingkungan)</p>
-    </div>
+<div class="container">
 
-  </div>
+  <!-- GAUGES -->
+  <div class="gauges">
+    <canvas id="gaugePressure" width="220" height="220"></canvas>
+    <canvas id="gaugeTemperature" width="220" height="220"></canvas>
+    <canvas id="gaugeHumidity" width="220" height="220"></canvas>
+    <canvas id="gaugeAltitude" width="220" height="220"></canvas>
+  </div>
 
-  <script>
-    // ---------------- GAUGES -----------------------
-    // Voltage, Current, dan Power tetap sebagai placeholder, namun tidak di-update
-    const gaugeVoltage = new RadialGauge({
-      renderTo: "gaugeVoltage",
-      width: 200,
-      height: 200,
-      units: "Volt (Placeholder)",
-      minValue: 0,
-      maxValue: 300,
-      majorTicks: ["0","50","100","150","200","250","300"],
-      strokeTicks: true,
-      highlights: [],
-      colorPlate: "#222",
-      colorNumbers: "#fff",
-      needleType: "line",
-      animationDuration: 500,
-    }).draw();
+  <!-- CHART -->
+  <div class="chart-box">
+    <canvas id="lineChart"></canvas>
+  </div>
 
-    const gaugeCurrent = new RadialGauge({
-      renderTo: "gaugeCurrent",
-      width: 200,
-      height: 200,
-      units: "Ampere (Placeholder)",
-      minValue: 0,
-      maxValue: 20,
-      majorTicks: ["0","5","10","15","20"],
-      strokeTicks: true,
-      colorPlate: "#222",
-      colorNumbers: "#fff",
-      needleType: "line",
-      animationDuration: 500,
-    }).draw();
+</div>
 
-    const gaugePower = new RadialGauge({
-      renderTo: "gaugePower",
-      width: 200,
-      height: 200,
-      units: "Watt (Placeholder)",
-      minValue: 0,
-      maxValue: 5000,
-      majorTicks: ["0","1000","2000","3000","4000","5000"],
-      strokeTicks: true,
-      colorPlate: "#222",
-      colorNumbers: "#fff",
-      needleType: "line",
-      animationDuration: 500,
-    }).draw();
-
-    // 2. Gauge Tekanan Udara
-    const gaugePressure = new RadialGauge({
-      renderTo: "gaugePressure", // Ganti renderTo
-      width: 200,
-      height: 200,
-      units: "hPa (Tekanan)",
-      minValue: 900, // Tekanan udara umumnya di sekitar 900-1100 hPa
-      maxValue: 1100,
-      majorTicks: ["900","950","1000","1050","1100"],
-      strokeTicks: true,
-      colorPlate: "#222",
-      colorNumbers: "#fff",
-      needleType: "line",
-      animationDuration: 500,
-    }).draw();
-
-
-    // ---------------- GRAPH -----------------------
-    const ctx = document.getElementById("lineChart").getContext("2d");
-    
-    const chartData = {
-      labels: [],
-      datasets: [
-        // 4. Perbarui Label dan Warna Grafik
-        {
-          label: "Tekanan Udara (hPa)",
-          data: [],
-          borderWidth: 2,
-          borderColor: "rgb(0,150,255)", // Biru untuk Tekanan
-        },
-        {
-          label: "Suhu (°C) - Tambahan",
-          data: [],
-          borderWidth: 2,
-          borderColor: "rgb(255,50,50)", // Merah untuk Suhu
-        },
-        {
-          label: "Kelembaban (%) - Tambahan",
-          data: [],
-          borderWidth: 2,
-          borderColor: "rgb(0,255,150)", // Hijau untuk Kelembaban
-        },
-      ]
-    };
-
-    const lineChart = new Chart(ctx, {
-      type: "line",
-      data: chartData,
-      options: {
-        responsive: true,
-        animation: false,
-        scales: {
-          y: { beginAtZero: false } // Tekanan tidak dimulai dari nol
-        }
-      }
-    });
-
-
-    // ---------------- SIMULATION -----------------------
-    function updateData() {
-      // 3. Sesuaikan Logika Simulasi
-      // Simulasi Tekanan Udara (hPa)
-      const pressure = 1013 + (Math.random() - 0.5) * 5; 
-      
-      // Simulasi Suhu (°C) - Contoh data tambahan
-      const temperature = 25 + (Math.random() - 0.5) * 2;
-
-      // Simulasi Kelembaban (%) - Contoh data tambahan
-      const humidity = 60 + Math.random() * 5; 
-
-      // Update gauge Tekanan Udara
-      gaugePressure.value = pressure;
-
-      // Update chart
-      const now = new Date().toLocaleTimeString();
-      chartData.labels.push(now);
-
-      chartData.datasets[0].data.push(pressure); 
-      chartData.datasets[1].data.push(temperature);
-      chartData.datasets[2].data.push(humidity);
-
-      if (chartData.labels.length > 30) {
-        chartData.labels.shift();
-        chartData.datasets.forEach(ds => ds.data.shift());
-      }
-
-      lineChart.update();
-    }
-
-    // Update tiap 1 detik
-    setInterval(updateData, 1000);
-
-  </script>
-
-</body>
-</html>
+<script>
+  // ================= GAUGES =======================
+  const gaugePressure = new RadialGauge({
+    renderTo: "gaugePressure",
+    width: 220, height: 220,
+    units: "Pressure (hPa)",
+    minValue: 950, maxValue: 1050,
+    majorTicks: ["950","970","990","1010","1030","1050"],
+    colorPlate: "#111524",
+    colorNumbers: "#fff",
+    needleType: "arrow",
+    animationDuration: 600
+  }).dra
