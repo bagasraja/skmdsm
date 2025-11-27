@@ -3,89 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Environmental Monitoring Dashboard</title>
+  <title>Dashboard Tekanan Udara</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
 
   <style>
     body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #0c0f19;
-      color: #e4e4e4;
-      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b);
+      color: #e0e1dd;
+      padding: 20px;
     }
 
-    header {
-      padding: 20px;
+    .title {
       text-align: center;
-      background: #111524;
-      font-size: 26px;
+      font-size: 32px;
+      margin-bottom: 20px;
       font-weight: bold;
-      color: #61dafb;
-      box-shadow: 0 2px 10px #000;
-      letter-spacing: 1px;
     }
 
     .container {
       max-width: 1000px;
       margin: auto;
-      padding: 20px;
-    }
-
-    .gauges {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
     }
 
-    .chart-box {
-      background: #111524;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+    .card {
+      background: rgba(255, 255, 255, 0.07);
+      padding: 25px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      text-align: center;
     }
 
-    canvas {
-      max-width: 100%;
-    }
+    canvas { max-width: 100%; }
   </style>
-
 </head>
 
 <body>
+  <div class="title">Dashboard Monitoring Tekanan Udara</div>
 
-<header>Environmental Sensor Dashboard</header>
+  <div class="container">
+    <!-- GAUGE TEKANAN -->
+    <div class="card">
+      <canvas id="gaugePressure" width="300" height="300"></canvas>
+    </div>
 
-<div class="container">
-
-  <!-- GAUGES -->
-  <div class="gauges">
-    <canvas id="gaugePressure" width="220" height="220"></canvas>
-    <canvas id="gaugeTemperature" width="220" height="220"></canvas>
-    <canvas id="gaugeHumidity" width="220" height="220"></canvas>
-    <canvas id="gaugeAltitude" width="220" height="220"></canvas>
+    <!-- GRAFIK TEKANAN -->
+    <div class="card">
+      <canvas id="pressureChart"></canvas>
+    </div>
   </div>
 
-  <!-- CHART -->
-  <div class="chart-box">
-    <canvas id="lineChart"></canvas>
-  </div>
+  <script>
+    // ---------------- GAUGE TEKANAN -----------------------
+    const gaugePressure = new RadialGauge({
+      renderTo: "gaugePressure",
+      width: 300,
+      height: 300,
+      units: "kPa",
+      minValue: 0,
+      maxValue: 200,
+      majorTicks: ["0","20","40","60","80","100","120","140","160","180","200"],
+      strokeTicks: true,
+      colorPlate: "#1b263b",
+      colorNumbers: "#e0e1dd",
+      needleType: "arrow",
+      colorNeedle: "#e63946",
+      colorNeedleEnd: "#e63946",
+      animationDuration: 400,
+    }).draw();
 
-</div>
+    // ---------------- GRAPH -----------------------
+    const ctx = document.getElementById("pressureChart").getContext("2d");
 
-<script>
-  // ================= GAUGES =======================
-  const gaugePressure = new RadialGauge({
-    renderTo: "gaugePressure",
-    width: 220, height: 220,
-    units: "Pressure (hPa)",
-    minValue: 950, maxValue: 1050,
-    majorTicks: ["950","970","990","1010","1030","1050"],
-    colorPlate: "#111524",
-    colorNumbers: "#fff",
-    needleType: "arrow",
-    animationDuration: 600
-  }).dra
+    const chartData = {
+      labels: [],
+      datasets: [
+        {
+          label: "Tekanan Udara (kPa)",
+          data: [],
+          borderWidth: 3,
+          borderColor: "#e63946",
+        }
+      ]
+    };
+
+    const pressureChart = new Chart(ctx, {
+      type: "line",
+      data: chartData,
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // ---------------- SIMULATION -----------------------
+    function updatePressure() {
+      const pressure = 90 + Math.random() * 20; // simulasi tekanan
+
+      gaugePressure.value = pressure;
+
+      const now = new Date().toLocaleTimeString();
+      chartData.labels.push(now);
+      chartData.datasets[0].data.push(pressure);
+
+      if (chartData.labels.length > 30) {
+        chartData.labels.shift();
+        chartData.datasets[0].data.shift();
+      }
+
+      pressureChart.update();
+    }
+
+    setInterval(updatePressure, 1000);
+  </script>
+
+</body>
+</html>
